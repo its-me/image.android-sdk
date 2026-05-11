@@ -34,7 +34,7 @@ Adds the Android build tools package (`aapt`, `d8`, `zipalign`, etc.) via `sdkma
 
 ---
 
-### `platform`: Android platform SDK
+### `<version>`: Android platform SDK
 
 **Dockerfile:** `Dockerfile`  
 **Base:** `build-tools`
@@ -44,7 +44,7 @@ Adds the Android platform SDK for a specific API level via `sdkmanager`.
 | Tag | Example | Meaning |
 |-----|---------|---------|
 | `<version>` | `37.0` | Exact platform version |
-| `<level>-ext<n>` | `35-ext14` | Extension release for a platform level |
+| `<version>-ext<n>` | `35-ext14` | Extension release for a platform version |
 | `latest` | `latest` | Latest stable platform (not applied to extension releases) |
 
 Platform versions follow the upstream scheme: plain integers or decimals (`35`, `36.1`, `37.0`) for standard releases, and `<version>-ext<n>` for extension releases.
