@@ -1,6 +1,6 @@
 # Android SDK container images
 
-Docker images for Android SDK tooling, published to GHCR, Docker Hub, and Quay.io. Three-layered images are built and tagged independently; each layer adds one SDK component on top of the previous one.
+Docker base images for Flutter and Android CI pipelines — providing the Android SDK layer that Flutter builds require. Three-layered images are built and tagged independently; each layer adds one SDK component on top of the previous one. Images are published to GHCR, Docker Hub, and Quay.io.
 
 ## Images and tags
 
@@ -11,10 +11,10 @@ Docker images for Android SDK tooling, published to GHCR, Docker Hub, and Quay.i
 
 Installs OpenJDK 21, the Android SDK command-line tools (`sdkmanager`, `adb`, etc.), and supporting system packages (Ruby, `build-essential`, `curl`, `git`, etc.). Provides the `android-wait-for-emulator` helper script. All subsequent images build on top of this one.
 
-| Tag | Meaning |
-|-----|---------|
-| `tools-<version>` | Exact command-line tools build (e.g. `tools-14742923`) |
-| `tools` | Latest released command-line tools |
+| Tag | Example | Meaning |
+|-----|---------|---------|
+| `tools-<version>` | `tools-14742923` | Exact command-line tools build |
+| `tools` | `tools` | Latest released command-line tools |
 
 ---
 
@@ -25,12 +25,12 @@ Installs OpenJDK 21, the Android SDK command-line tools (`sdkmanager`, `adb`, et
 
 Adds the Android build tools package (`aapt`, `d8`, `zipalign`, etc.) via `sdkmanager`.
 
-| Tag | Meaning |
-|-----|---------|
-| `build-tools-<version>` | Exact build-tools version (e.g. `build-tools-37.0.0`) |
-| `build-tools-<major>` | Latest stable for a major version (e.g. `build-tools-37`) |
-| `build-tools-<major>-rc<n>` | Latest RC for a major version (e.g. `build-tools-37-rc1`) |
-| `build-tools` | Latest released build tools |
+| Tag | Example | Meaning |
+|-----|---------|---------|
+| `build-tools-<version>` | `build-tools-37.0.0` | Exact build-tools version |
+| `build-tools-<major>` | `build-tools-37` | Latest stable for a major version |
+| `build-tools-<major>-rc<n>` | `build-tools-37-rc1` | Latest RC for a major version |
+| `build-tools` | `build-tools` | Latest released build tools |
 
 ---
 
@@ -41,12 +41,44 @@ Adds the Android build tools package (`aapt`, `d8`, `zipalign`, etc.) via `sdkma
 
 Adds the Android platform SDK for a specific API level via `sdkmanager`.
 
-| Tag | Meaning |
-|-----|---------|
-| `<version>` | Exact platform version (e.g. `37.0`, `35-ext14`) |
-| `latest` | Latest stable platform (not applied to extension releases) |
+| Tag | Example | Meaning |
+|-----|---------|---------|
+| `<version>` | `37.0` | Exact platform version |
+| `<level>-ext<n>` | `35-ext14` | Extension release for a platform level |
+| `latest` | `latest` | Latest stable platform (not applied to extension releases) |
 
-Platform versions follow the upstream scheme: plain integers or decimals (`35`, `36.1`, `37.0`) for standard releases and `<level>-ext<n>` for extension releases (e.g. `35-ext14`).
+Platform versions follow the upstream scheme: plain integers or decimals (`35`, `36.1`, `37.0`) for standard releases, and `<level>-ext<n>` for extension releases.
+
+---
+
+## Usage
+
+These images provide the Android SDK layer that Flutter (or plain Android) builds need. Use them as a base image and add Flutter on top:
+
+```dockerfile
+FROM ghcr.io/its-me/android-sdk:latest
+RUN wget -qO /tmp/flutter.tar.xz https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_<version>-stable.tar.xz \
+    && tar xf /tmp/flutter.tar.xz -C /opt \
+    && rm /tmp/flutter.tar.xz
+ENV PATH="/opt/flutter/bin:$PATH"
+```
+
+Or reference the image directly in CI when Flutter is already installed in the runner:
+
+```yaml
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: ghcr.io/its-me/android-sdk:latest
+```
+
+Pin to a specific platform version for reproducible builds:
+
+```yaml
+container: ghcr.io/its-me/android-sdk:37.0
+```
+
+If you only need build tools without the platform SDK, use the `build-tools` image; for just `sdkmanager` and platform tools, use `tools`.
 
 ---
 
