@@ -28,8 +28,8 @@ Adds the Android build tools package (`aapt`, `d8`, `zipalign`, etc.) via `sdkma
 | Tag | Example | Meaning |
 |-----|---------|---------|
 | `build-tools-<version>` | `build-tools-37.0.0` | Exact build-tools version |
-| `build-tools-<major>` | `build-tools-37` | Latest stable for a major version |
-| `build-tools-<major>-rc<n>` | `build-tools-37-rc1` | Latest RC for a major version |
+| `build-tools-<major-version>` | `build-tools-37` | Latest stable for a major version |
+| `build-tools-<major-version>-rc<n>` | `build-tools-37-rc1` | Latest RC for a major version |
 | `build-tools` | `build-tools` | Latest released build tools |
 
 ---
