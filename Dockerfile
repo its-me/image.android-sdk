@@ -1,9 +1,9 @@
-FROM localhost/android-sdk:tools
+ARG BASE_IMAGE=ghcr.io/its-me/android-sdk:build-tools
+FROM ${BASE_IMAGE}
 
-# https://developer.android.com/studio/releases/build-tools
-ENV ANDROID_PLATFORM_VERSION 34
-ENV ANDROID_BUILD_TOOLS_VERSION 33.0.1
+# https://developer.android.com/studio/releases/platforms
+ARG ANDROID_PLATFORM_VERSION=37
 
-RUN yes | sdkmanager \
-    "platforms;android-$ANDROID_PLATFORM_VERSION" \
-    "build-tools;$ANDROID_BUILD_TOOLS_VERSION"
+ENV ANDROID_PLATFORM_VERSION=${ANDROID_PLATFORM_VERSION}
+
+RUN yes | sdkmanager "platforms;android-${ANDROID_PLATFORM_VERSION}"

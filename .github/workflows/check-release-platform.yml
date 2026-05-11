@@ -1,0 +1,31 @@
+name: "platform: check release"
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Check and trigger new release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          versions=$(curl -s 'https://dl.google.com/android/repository/repository2-3.xml' \
+            | grep -oP 'platforms;android-\K[0-9]+(?:-ext[0-9]+)?' \
+            | awk -F- '{if ($1+0 >= 30) print}' \
+            | sort -uV)
+          for version in $versions; do
+            if ! git ls-remote --exit-code origin "refs/tags/$version" > /dev/null 2>&1; then
+              gh workflow run release-platform.yml -f version="$version"
+            fi
+          done
