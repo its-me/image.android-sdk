@@ -97,9 +97,9 @@ Each image family has a daily check workflow that queries the [Android SDK repos
 
 | Workflow | Schedule (UTC) | Watches |
 |----------|---------------|---------|
-| `tools: check release` | 00:00 daily | `commandlinetools-linux-*` |
+| `tools: check release` | 00:00 daily | `commandlinetools-linux-<version>` |
 | `build-tools: check release` | 01:00 daily | `build-tools;<version>` |
-| `platform: check release` | 02:00 daily | `platforms;android-*` |
+| `platform: check release` | 02:00 daily | `platforms;android-<version>` |
 
 Release workflows can also be triggered manually via `workflow_dispatch` with an explicit version input.
 
