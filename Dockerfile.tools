@@ -1,4 +1,4 @@
-FROM debian:stable
+FROM debian:stable-slim
 
 ENV ANDROID_HOME=/opt/android-sdk \
     LANG=en_US.UTF-8 \
@@ -8,37 +8,81 @@ ENV ANDROID_HOME=/opt/android-sdk \
 ENV ANDROID_SDK_ROOT=$ANDROID_HOME \
     PATH=${PATH}:${ANDROID_HOME}/cmdline-tools/latest/bin:${ANDROID_HOME}/platform-tools:${ANDROID_HOME}/emulator
 
-# comes from https://developer.android.com/studio/#command-line-tools-only
-ENV ANDROID_SDK_TOOLS_VERSION 13114758
+# https://developer.android.com/studio/#command-line-tools-only
+ENV ANDROID_SDK_TOOLS_VERSION=13114758
 
 RUN set -o xtrace \
-    && cd /opt \
     && apt-get update \
-    && apt-get install -y locales \
+    && apt-get install -y --no-install-recommends \
+        locales \
+        jq \
+        openjdk-21-jdk \
+        sudo \
+        wget \
+        zip \
+        unzip \
+        git \
+        openssh-client \
+        curl \
+        bc \
+        build-essential \
+        ruby-full \
+        ruby-bundler \
+        libstdc++6 \
+        libpulse0 \
+        libglu1-mesa \
+        lcov \
+        libsqlite3-dev \
+        sqlite3 \
+        xxd \
+        lftp \
+        libxtst6 \
+        libnss3-dev \
+        libnspr4 \
+        libxss1 \
+        libasound2t64 \
+        libatk-bridge2.0-0 \
+        libgtk-3-0 \
+        libgdk-pixbuf-2.0-0 \
     && sh -c 'echo "en_US.UTF-8 UTF-8" > /etc/locale.gen' \
     && locale-gen \
     && update-locale LANG=en_US.UTF-8 \
-    && apt-get install -y jq \
-    && apt-get install -y openjdk-21-jdk \
-    #&& apt-get install -y sudo wget zip unzip git openssh-client curl bc software-properties-common build-essential ruby-full ruby-bundler libstdc++6 libpulse0 libglu1-mesa lcov libsqlite3-dev --no-install-recommends \
-    && apt-get install -y sudo wget zip unzip git openssh-client curl bc build-essential ruby-full ruby-bundler libstdc++6 libpulse0 libglu1-mesa lcov libsqlite3-dev --no-install-recommends \
-    # for x86 emulators
-    && apt-get install -y libxtst6 libnss3-dev libnspr4 libxss1 libasound2t64 libatk-bridge2.0-0 libgtk-3-0 libgdk-pixbuf-2.0-0 \
-    && apt-get install -y -qq xxd \
-    && apt-get install -y lftp \
-    && apt-get install -qq -y sqlite3 libsqlite3-dev \
     && rm -rf /var/lib/apt/lists/* \
-    && wget --no-show-progress -q https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_TOOLS_VERSION}_latest.zip -O android-sdk-tools.zip \
+    && wget --no-show-progress -q \
+        https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_TOOLS_VERSION}_latest.zip \
+        -O /tmp/android-sdk-tools.zip \
     && mkdir -p ${ANDROID_HOME}/cmdline-tools/ \
-    && unzip -q android-sdk-tools.zip -d ${ANDROID_HOME}/cmdline-tools/ \
+    && unzip -q /tmp/android-sdk-tools.zip -d ${ANDROID_HOME}/cmdline-tools/ \
     && mv ${ANDROID_HOME}/cmdline-tools/cmdline-tools ${ANDROID_HOME}/cmdline-tools/latest \
-    && chown -R root:root $ANDROID_HOME \
-    && rm android-sdk-tools.zip \
+    && rm /tmp/android-sdk-tools.zip \
     && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers \
     && yes | sdkmanager --licenses \
-    && wget --no-show-progress -O /usr/local/bin/android-wait-for-emulator https://raw.githubusercontent.com/travis-ci/travis-cookbooks/master/community-cookbooks/android-sdk/files/default/android-wait-for-emulator \
-    && chmod +x /usr/local/bin/android-wait-for-emulator \
-    && touch /root/.android/repositories.cfg \
     && sdkmanager platform-tools \
-    && mkdir -p /root/.android \
-    && touch /root/.android/repositories.cfg
+    && printf '#!/bin/bash\n\
+# Wait for Android emulator to finish booting\n\
+set +e\n\
+bootanim=""\n\
+failcounter=0\n\
+timeout_in_sec=360\n\
+until [[ "$bootanim" =~ "stopped" ]]; do\n\
+  bootanim=$(adb -e shell getprop init.svc.bootanim 2>&1)\n\
+  if [[ "$bootanim" =~ "device not found" || "$bootanim" =~ "device offline" || "$bootanim" =~ "running" ]]; then\n\
+    let "failcounter += 1"\n\
+    echo "Waiting for emulator to start"\n\
+    if [[ $failcounter -gt $timeout_in_sec ]]; then\n\
+      echo "Timeout ($timeout_in_sec seconds) reached; failed to start emulator"\n\
+      exit 1\n\
+    fi\n\
+  fi\n\
+  sleep 1\n\
+done\n\
+echo "Emulator is ready"\n\
+' > /usr/local/bin/android-wait-for-emulator \
+    && chmod +x /usr/local/bin/android-wait-for-emulator \
+    && useradd -M -d /opt/android-sdk -s /bin/bash -G sudo android-sdk \
+    && chown -R android-sdk:android-sdk ${ANDROID_HOME} \
+    && mkdir -p /opt/android-sdk/.android \
+    && touch /opt/android-sdk/.android/repositories.cfg \
+    && chown -R android-sdk:android-sdk /opt/android-sdk/.android
+
+USER android-sdk
