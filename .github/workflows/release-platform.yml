@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Platform version (e.g. 35 or 35-ext14)'
+        description: 'Platform version (e.g. 35, 35-ext14, 36.1 or 37.0)'
         required: true
 
 jobs:

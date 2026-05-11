@@ -21,7 +21,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           latest=$(curl -s 'https://dl.google.com/android/repository/repository2-3.xml' \
-            | grep -oP 'platforms;android-\K[0-9]+(?:-ext[0-9]+)?' \
+            | grep -oP 'platforms;android-\K[0-9]+(?:\.[0-9]+)?(?:-ext[0-9]+)?' \
             | sed 's/$/-z/' | sort -uV | tail -1 | sed 's/-z$//')
           if ! git ls-remote --exit-code origin "refs/tags/$latest"; then
             gh workflow run release-platform.yml -f version="$latest"
