@@ -26,10 +26,12 @@ jobs:
       - id: tags
         run: |
           version="${{ github.event.inputs.version }}"
+          major="${version%%.*}"
           {
             echo "tags<<EOF"
             echo "ghcr.io/${{ github.repository }}:${version}"
             if [[ "$version" != *"-ext"* ]]; then
+              [[ "$major" != "$version" ]] && echo "ghcr.io/${{ github.repository }}:${major}"
               echo "ghcr.io/${{ github.repository }}:latest"
             fi
             echo "EOF"
@@ -80,9 +82,11 @@ jobs:
 
       - run: |
           version="${{ github.event.inputs.version }}"
+          major="${version%%.*}"
           extra_args=""
           if [[ "$version" != *"-ext"* ]]; then
-            extra_args="--tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest"
+            [[ "$major" != "$version" ]] && extra_args="--tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${major}"
+            extra_args="$extra_args --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest"
           fi
           docker buildx imagetools create \
             --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${version} \
@@ -114,9 +118,11 @@ jobs:
           QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
         run: |
           version="${{ github.event.inputs.version }}"
+          major="${version%%.*}"
           extra_args=""
           if [[ "$version" != *"-ext"* ]]; then
-            extra_args="--tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:latest"
+            [[ "$major" != "$version" ]] && extra_args="--tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:${major}"
+            extra_args="$extra_args --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:latest"
           fi
           docker buildx imagetools create \
             --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:${version} \

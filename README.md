@@ -44,10 +44,11 @@ Adds the Android platform SDK for a specific API level via `sdkmanager`.
 | Tag | Example | Meaning |
 |-----|---------|---------|
 | `<version>` | `37.0` | Exact platform version |
-| `<version>-ext<n>` | `35-ext14` | Extension release for a platform version |
-| `latest` | `latest` | Latest stable platform (not applied to extension releases) |
+| `<major-version>` | `37` | Latest stable for a major version (decimal versioning only) |
+| `latest` | `latest` | Latest stable platform |
+| `<version>-ext<n>` | `35-ext14` | Extension release (version tag only) |
 
-Platform versions follow the upstream scheme: plain integers or decimals (`35`, `36.1`, `37.0`) for standard releases, and `<version>-ext<n>` for extension releases.
+Platform versions use either plain integers (`35`) or decimals (`36.1`, `37.0`). Decimal versions also receive a major tag (e.g. `37.0` → `37`). Extension releases only receive the version tag.
 
 ---
 
