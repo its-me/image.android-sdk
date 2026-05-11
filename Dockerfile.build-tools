@@ -1,0 +1,9 @@
+ARG BASE_IMAGE=ghcr.io/its-me/android-sdk:tools
+FROM ${BASE_IMAGE}
+
+# https://developer.android.com/studio/releases/build-tools
+ARG ANDROID_BUILD_TOOLS_VERSION=37.0.0
+
+ENV ANDROID_BUILD_TOOLS_VERSION=${ANDROID_BUILD_TOOLS_VERSION}
+
+RUN yes | sdkmanager "build-tools;${ANDROID_BUILD_TOOLS_VERSION}"
