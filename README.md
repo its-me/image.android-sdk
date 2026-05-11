@@ -1,6 +1,6 @@
-# android-sdk
+# Android SDK container images
 
-Docker images for Android SDK tooling, published to GHCR, Docker Hub, and Quay.io. Three layered images are built and tagged independently; each layer adds one SDK component on top of the previous one.
+Docker images for Android SDK tooling, published to GHCR, Docker Hub, and Quay.io. Three-layered images are built and tagged independently; each layer adds one SDK component on top of the previous one.
 
 ## Images and tags
 
