@@ -32,7 +32,7 @@ jobs:
           context: .
           file: Dockerfile.tools
           build-args: ANDROID_SDK_TOOLS_VERSION=${{ github.event.inputs.version }}
-          push: true
+          outputs: type=image,push=true
           tags: |
             ghcr.io/${{ github.repository }}:tools-${{ github.event.inputs.version }}
             ghcr.io/${{ github.repository }}:tools

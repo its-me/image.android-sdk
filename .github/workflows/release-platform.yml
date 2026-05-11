@@ -44,7 +44,7 @@ jobs:
           context: .
           file: Dockerfile
           build-args: ANDROID_PLATFORM_VERSION=${{ github.event.inputs.version }}
-          push: true
+          outputs: type=image,push=true
           tags: ${{ steps.tags.outputs.tags }}
 
   tag:
