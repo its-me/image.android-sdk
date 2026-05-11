@@ -13,8 +13,8 @@ Installs OpenJDK 21, the Android SDK command-line tools (`sdkmanager`, `adb`, et
 
 | Tag | Example | Meaning |
 |-----|---------|---------|
-| `tools-<version>` | `tools-14742923` | Exact command-line tools build |
-| `tools` | `tools` | Latest released command-line tools |
+| `tools-<version>` | `tools-14742923` | Exact command-line tools version |
+| `tools` | `tools` | Latest release of command-line tools |
 
 ---
 
@@ -28,9 +28,9 @@ Adds the Android build tools package (`aapt`, `d8`, `zipalign`, etc.) via `sdkma
 | Tag | Example | Meaning |
 |-----|---------|---------|
 | `build-tools-<version>` | `build-tools-37.0.0` | Exact build-tools version |
-| `build-tools-<version>-rc<n>` | `build-tools-37-rc1` | Latest RC for a major version |
-| `build-tools-<major-version>` | `build-tools-37` | Latest stable for a major version |
-| `build-tools` | `build-tools` | Latest released build tools |
+| `build-tools-<version>-rc<n>` | `build-tools-37.0.0-rc1` | Release candidate |
+| `build-tools-<major-version>` | `build-tools-37` | Latest version of major release |
+| `build-tools` | `build-tools` | Latest release of build-tools |
 
 ---
 
@@ -44,9 +44,9 @@ Adds the Android platform SDK for a specific API level via `sdkmanager`.
 | Tag | Example | Meaning |
 |-----|---------|---------|
 | `<version>` | `37.0` | Exact platform version |
-| `<major-version>` | `37` | Latest stable for a major version (decimal versioning only) |
-| `latest` | `latest` | Latest stable platform |
 | `<version>-ext<n>` | `35-ext14` | Extension release (version tag only) |
+| `<major-version>` | `37` | Latest version of major release |
+| `latest` | `latest` | Latest release of platform |
 
 Platform versions use either plain integers (`35`) or decimals (`36.1`, `37.0`). Decimal versions also receive a major tag (e.g. `37.0` → `37`). Extension releases only receive the version tag.
 
@@ -54,7 +54,7 @@ Platform versions use either plain integers (`35`) or decimals (`36.1`, `37.0`).
 
 ## Usage
 
-These images provide the Android SDK layer that Flutter builds need. Use them as a base image and add Flutter on top:
+These images provide the Android SDK layer required by Flutter. Use them as a base image and add Flutter on top:
 
 ```dockerfile
 FROM ghcr.io/its-me/android-sdk:latest
@@ -79,7 +79,7 @@ Pin to a specific platform version for reproducible builds:
 container: ghcr.io/its-me/android-sdk:37.0
 ```
 
-If you only need build tools without the platform SDK, use the `build-tools` image; for just `sdkmanager` and platform tools, use `tools`.
+If you only need build-tools without platform SDK, use `build-tools` image; for just `sdkmanager` and platform tools, use `tools`.
 
 ---
 
@@ -93,7 +93,7 @@ Images are mirrored to three registries under the same tag names:
 
 ## Automated releases
 
-Each image family has a daily check workflow that queries the [Android SDK repository XML](https://dl.google.com/android/repository/repository2-3.xml) for new versions. When a version is found that has no corresponding git tag, the matching release workflow is triggered automatically.
+Each image family has a daily check workflow that queries the [Android SDK repository XML](https://dl.google.com/android/repository/repository2-3.xml) for new versions. When a new version is found that has no corresponding git tag, the matching release workflow is triggered automatically.
 
 | Workflow | Schedule (UTC) | Watches |
 |----------|---------------|---------|
