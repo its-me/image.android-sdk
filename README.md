@@ -1,6 +1,6 @@
 # Android SDK container images
 
-Docker base images for Flutter and Android CI pipelines, providing the Android SDK layer that Flutter builds require. Three-layered images are built and tagged independently; each layer adds one SDK component on top of the previous one. Images are published to GHCR, Docker Hub, and Quay.io.
+Docker base images for Flutter CI pipelines, providing the Android SDK layer that Flutter builds require. Three-layered images are built and tagged independently; each layer adds one SDK component on top of the previous one. Images are published to GHCR, Docker Hub, and Quay.io.
 
 ## Images and tags
 
@@ -53,7 +53,7 @@ Platform versions follow the upstream scheme: plain integers or decimals (`35`, 
 
 ## Usage
 
-These images provide the Android SDK layer that Flutter (or plain Android) builds need. Use them as a base image and add Flutter on top:
+These images provide the Android SDK layer that Flutter builds need. Use them as a base image and add Flutter on top:
 
 ```dockerfile
 FROM ghcr.io/its-me/android-sdk:latest
