@@ -44,7 +44,6 @@ jobs:
         with:
           context: .
           file: Dockerfile.build-tools
-          platforms: linux/amd64
           build-args: ANDROID_BUILD_TOOLS_VERSION=${{ github.event.inputs.version }}
           push: true
           tags: |

@@ -43,7 +43,6 @@ jobs:
         with:
           context: .
           file: Dockerfile
-          platforms: linux/amd64
           build-args: ANDROID_PLATFORM_VERSION=${{ github.event.inputs.version }}
           push: true
           tags: ${{ steps.tags.outputs.tags }}
