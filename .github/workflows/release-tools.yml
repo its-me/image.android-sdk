@@ -44,15 +44,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      workflows: write
     steps:
-      - uses: actions/checkout@v6
-
-      - run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "tools-${{ github.event.inputs.version }}" -m "tools-${{ github.event.inputs.version }}"
-          git push origin "tools-${{ github.event.inputs.version }}"
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh api repos/${{ github.repository }}/git/refs \
+            --method POST \
+            -f ref="refs/tags/tools-${{ github.event.inputs.version }}" \
+            -f sha="${{ github.sha }}"
 
   push-dockerhub:
     name: Push to Docker Hub
