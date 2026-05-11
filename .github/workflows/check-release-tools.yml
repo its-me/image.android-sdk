@@ -1,4 +1,4 @@
-name: Check for new release
+name: Check for new tools release
 
 on:
   schedule:
@@ -22,5 +22,5 @@ jobs:
         run: |
           latest=$(curl -s 'https://dl.google.com/android/repository/repository2-3.xml' | grep -oP 'commandlinetools-linux-\K[0-9]+(?=_latest\.zip)' | sort -n | tail -1)
           if ! git ls-remote --exit-code origin "refs/tags/tools-$latest"; then
-            gh workflow run release.yml -f version="$latest"
+            gh workflow run release-tools.yml -f version="$latest"
           fi
