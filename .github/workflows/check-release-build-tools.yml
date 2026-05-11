@@ -1,4 +1,4 @@
-name: Check for new build-tools release
+name: "build-tools: check release"
 
 on:
   schedule:

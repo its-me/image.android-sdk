@@ -1,4 +1,4 @@
-name: Check for new tools release
+name: "tools: check release"
 
 on:
   schedule:

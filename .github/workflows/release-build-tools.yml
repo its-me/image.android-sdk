@@ -1,4 +1,4 @@
-name: Create new build-tools release
+name: "build-tools: release"
 
 on:
   workflow_dispatch:
