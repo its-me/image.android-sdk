@@ -55,7 +55,7 @@ Platform versions follow the upstream scheme: plain integers or decimals (`35`, 
 Images are mirrored to three registries under the same tag names:
 
 - `ghcr.io/its-me/android-sdk:<tag>`
-- `<dockerhub-user>/android-sdk:<tag>`
+- `1tsme/android-sdk:<tag>`
 - `quay.io/<quay-user>/android-sdk:<tag>`
 
 ## Automated releases
