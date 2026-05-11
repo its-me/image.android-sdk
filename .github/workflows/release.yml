@@ -1,10 +1,11 @@
 name: Create new release
 
 on:
-  push:
-    tags:
-      - 'tools-[0-9]+'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'SDK tools version number'
+        required: true
 
 jobs:
   build:
@@ -26,19 +27,31 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - id: version
-        run: echo "version=${GITHUB_REF_NAME#tools-}" >> $GITHUB_OUTPUT
-
       - uses: docker/build-push-action@v6
         with:
           context: .
           file: Dockerfile.tools
           platforms: linux/amd64
-          build-args: ANDROID_SDK_TOOLS_VERSION=${{ steps.version.outputs.version }}
+          build-args: ANDROID_SDK_TOOLS_VERSION=${{ github.event.inputs.version }}
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}:tools-${{ github.event.inputs.version }}
             ghcr.io/${{ github.repository }}:tools
+
+  tag:
+    name: Create git tag
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "tools-${{ github.event.inputs.version }}" -m "tools-${{ github.event.inputs.version }}"
+          git push origin "tools-${{ github.event.inputs.version }}"
 
   push-dockerhub:
     name: Push to Docker Hub
@@ -62,9 +75,9 @@ jobs:
 
       - run: |
           docker buildx imagetools create \
-            --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ github.ref_name }} \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:tools-${{ github.event.inputs.version }} \
             --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:tools \
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}:tools-${{ github.event.inputs.version }}
 
   push-quay:
     name: Push to Quay
@@ -91,6 +104,6 @@ jobs:
           QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
         run: |
           docker buildx imagetools create \
-            --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:${{ github.ref_name }} \
+            --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:tools-${{ github.event.inputs.version }} \
             --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:tools \
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ github.repository }}:tools-${{ github.event.inputs.version }}
