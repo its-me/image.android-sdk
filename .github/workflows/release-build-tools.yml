@@ -44,8 +44,8 @@ jobs:
           push: true
           tags: |
             ghcr.io/${{ github.repository }}:build-tools-${{ github.event.inputs.version }}
-            ghcr.io/${{ github.repository }}:build-tools
             ghcr.io/${{ github.repository }}:${{ steps.tags.outputs.major_tag }}
+            ghcr.io/${{ github.repository }}:build-tools
 
   tag:
     name: Create git tag
@@ -85,8 +85,8 @@ jobs:
       - run: |
           docker buildx imagetools create \
             --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:build-tools-${{ github.event.inputs.version }} \
-            --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:build-tools \
             --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ needs.build.outputs.major_tag }} \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:build-tools \
             ghcr.io/${{ github.repository }}:build-tools-${{ github.event.inputs.version }}
 
   push-quay:
@@ -115,6 +115,6 @@ jobs:
         run: |
           docker buildx imagetools create \
             --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:build-tools-${{ github.event.inputs.version }} \
-            --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:build-tools \
             --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:${{ needs.build.outputs.major_tag }} \
+            --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:build-tools \
             ghcr.io/${{ github.repository }}:build-tools-${{ github.event.inputs.version }}
