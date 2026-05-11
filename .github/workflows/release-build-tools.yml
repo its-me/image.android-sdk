@@ -14,6 +14,8 @@ jobs:
     permissions:
       contents: read
       packages: write
+    outputs:
+      major_tag: ${{ steps.tags.outputs.major_tag }}
     steps:
       - uses: actions/checkout@v6
 
@@ -27,6 +29,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - id: tags
+        run: |
+          version="${{ github.event.inputs.version }}"
+          major="${version%%.*}"
+          if [[ "$version" == *"-rc"* ]]; then
+            echo "major_tag=build-tools-${major}-rc" >> $GITHUB_OUTPUT
+          else
+            echo "major_tag=build-tools-${major}" >> $GITHUB_OUTPUT
+          fi
+
       - uses: docker/build-push-action@v7
         with:
           context: .
@@ -37,6 +49,7 @@ jobs:
           tags: |
             ghcr.io/${{ github.repository }}:build-tools-${{ github.event.inputs.version }}
             ghcr.io/${{ github.repository }}:build-tools
+            ghcr.io/${{ github.repository }}:${{ steps.tags.outputs.major_tag }}
 
   tag:
     name: Create git tag
@@ -77,6 +90,7 @@ jobs:
           docker buildx imagetools create \
             --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:build-tools-${{ github.event.inputs.version }} \
             --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:build-tools \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ needs.build.outputs.major_tag }} \
             ghcr.io/${{ github.repository }}:build-tools-${{ github.event.inputs.version }}
 
   push-quay:
@@ -106,4 +120,5 @@ jobs:
           docker buildx imagetools create \
             --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:build-tools-${{ github.event.inputs.version }} \
             --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:build-tools \
+            --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:${{ needs.build.outputs.major_tag }} \
             ghcr.io/${{ github.repository }}:build-tools-${{ github.event.inputs.version }}
