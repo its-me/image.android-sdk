@@ -1,10 +1,10 @@
 # Android SDK container images
 
-Docker base images for Flutter and Android CI pipelines — providing the Android SDK layer that Flutter builds require. Three-layered images are built and tagged independently; each layer adds one SDK component on top of the previous one. Images are published to GHCR, Docker Hub, and Quay.io.
+Docker base images for Flutter and Android CI pipelines, providing the Android SDK layer that Flutter builds require. Three-layered images are built and tagged independently; each layer adds one SDK component on top of the previous one. Images are published to GHCR, Docker Hub, and Quay.io.
 
 ## Images and tags
 
-### `tools` — Android command-line tools
+### `tools`: Android command-line tools
 
 **Dockerfile:** `Dockerfile.tools`  
 **Base:** `debian:stable-slim`
@@ -18,7 +18,7 @@ Installs OpenJDK 21, the Android SDK command-line tools (`sdkmanager`, `adb`, et
 
 ---
 
-### `build-tools` — Android build tools
+### `build-tools`: Android build tools
 
 **Dockerfile:** `Dockerfile.build-tools`  
 **Base:** `tools`
@@ -34,7 +34,7 @@ Adds the Android build tools package (`aapt`, `d8`, `zipalign`, etc.) via `sdkma
 
 ---
 
-### `<platform>` — Android platform SDK
+### `<platform>`: Android platform SDK
 
 **Dockerfile:** `Dockerfile`  
 **Base:** `build-tools`
@@ -86,9 +86,9 @@ If you only need build tools without the platform SDK, use the `build-tools` ima
 
 Images are mirrored to three registries under the same tag names:
 
-- `ghcr.io/its-me/android-sdk:<tag>`
-- `1tsme/android-sdk:<tag>`
-- `quay.io/<quay-user>/android-sdk:<tag>`
+- [ghcr.io/its-me/android-sdk](https://ghcr.io/its-me/android-sdk)
+- [itsme/android-sdk](https://hub.docker.com/r/itsme/android-sdk)
+- [quay.io/itsme/android-sdk](https://quay.io/repository/itsme/android-sdk)
 
 ## Automated releases
 
