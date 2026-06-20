@@ -1,8 +1,8 @@
-name: "build-tools: check release"
+name: "platform: check release"
 
 on:
   schedule:
-    - cron: '0 1 * * *'
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 jobs:
@@ -21,8 +21,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           latest=$(curl -s 'https://dl.google.com/android/repository/repository2-3.xml' \
-            | grep -oP 'build-tools;\K[0-9]+\.[0-9]+\.[0-9]+(?:-rc[0-9]+)?' \
+            | grep -oP 'platforms;android-\K[0-9]+(?:\.[0-9]+)?(?:-ext[0-9]+)?' \
             | sed 's/$/-z/' | sort -uV | tail -1 | sed 's/-z$//')
-          if ! git ls-remote --exit-code origin "refs/tags/build-tools-$latest"; then
-            gh workflow run release-build-tools.yml -f version="$latest"
+          if ! git ls-remote --exit-code origin "refs/tags/$latest"; then
+            gh workflow run release-platform.yaml -f version="$latest"
           fi
