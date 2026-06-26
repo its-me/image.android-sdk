@@ -43,9 +43,9 @@ jobs:
           build-args: ANDROID_BUILD_TOOLS_VERSION=${{ github.event.inputs.version }}
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:build-tools-${{ github.event.inputs.version }}
-            ghcr.io/${{ github.repository }}:${{ steps.tags.outputs.major_tag }}
-            ghcr.io/${{ github.repository }}:build-tools
+            ghcr.io/its-me/android-sdk:build-tools-${{ github.event.inputs.version }}
+            ghcr.io/its-me/android-sdk:${{ steps.tags.outputs.major_tag }}
+            ghcr.io/its-me/android-sdk:build-tools
 
   tag:
     name: Create git tag
@@ -57,7 +57,7 @@ jobs:
       - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh api repos/${{ github.repository }}/git/refs \
+          gh api repos/its-me/android-sdk/git/refs \
             --method POST \
             -f ref="refs/tags/build-tools-${{ github.event.inputs.version }}" \
             -f sha="${{ github.sha }}"
@@ -84,10 +84,10 @@ jobs:
 
       - run: |
           docker buildx imagetools create \
-            --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:build-tools-${{ github.event.inputs.version }} \
-            --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${{ needs.build.outputs.major_tag }} \
-            --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:build-tools \
-            ghcr.io/${{ github.repository }}:build-tools-${{ github.event.inputs.version }}
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/android-sdk:build-tools-${{ github.event.inputs.version }} \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/android-sdk:${{ needs.build.outputs.major_tag }} \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/android-sdk:build-tools \
+            ghcr.io/its-me/android-sdk:build-tools-${{ github.event.inputs.version }}
 
   push-quay:
     name: Push to Quay
@@ -114,7 +114,7 @@ jobs:
           QUAY_NAMESPACE: ${{ secrets.QUAY_USERNAME }}
         run: |
           docker buildx imagetools create \
-            --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:build-tools-${{ github.event.inputs.version }} \
-            --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:${{ needs.build.outputs.major_tag }} \
-            --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:build-tools \
-            ghcr.io/${{ github.repository }}:build-tools-${{ github.event.inputs.version }}
+            --tag quay.io/${QUAY_NAMESPACE%%+*}/android-sdk:build-tools-${{ github.event.inputs.version }} \
+            --tag quay.io/${QUAY_NAMESPACE%%+*}/android-sdk:${{ needs.build.outputs.major_tag }} \
+            --tag quay.io/${QUAY_NAMESPACE%%+*}/android-sdk:build-tools \
+            ghcr.io/its-me/android-sdk:build-tools-${{ github.event.inputs.version }}

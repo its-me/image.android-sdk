@@ -29,10 +29,10 @@ jobs:
           major="${version%%.*}"
           {
             echo "tags<<EOF"
-            echo "ghcr.io/${{ github.repository }}:${version}"
+            echo "ghcr.io/its-me/android-sdk:${version}"
             if [[ "$version" != *"-ext"* ]]; then
-              [[ "$major" != "$version" ]] && echo "ghcr.io/${{ github.repository }}:${major}"
-              echo "ghcr.io/${{ github.repository }}:latest"
+              [[ "$major" != "$version" ]] && echo "ghcr.io/its-me/android-sdk:${major}"
+              echo "ghcr.io/its-me/android-sdk:latest"
             fi
             echo "EOF"
           } >> $GITHUB_OUTPUT
@@ -55,7 +55,7 @@ jobs:
       - env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh api repos/${{ github.repository }}/git/refs \
+          gh api repos/its-me/android-sdk/git/refs \
             --method POST \
             -f ref="refs/tags/${{ github.event.inputs.version }}" \
             -f sha="${{ github.sha }}"
@@ -85,13 +85,13 @@ jobs:
           major="${version%%.*}"
           extra_args=""
           if [[ "$version" != *"-ext"* ]]; then
-            [[ "$major" != "$version" ]] && extra_args="--tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${major}"
-            extra_args="$extra_args --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:latest"
+            [[ "$major" != "$version" ]] && extra_args="--tag ${{ secrets.DOCKERHUB_USERNAME }}/android-sdk:${major}"
+            extra_args="$extra_args --tag ${{ secrets.DOCKERHUB_USERNAME }}/android-sdk:latest"
           fi
           docker buildx imagetools create \
-            --tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}:${version} \
+            --tag ${{ secrets.DOCKERHUB_USERNAME }}/android-sdk:${version} \
             ${extra_args} \
-            ghcr.io/${{ github.repository }}:${version}
+            ghcr.io/its-me/android-sdk:${version}
 
   push-quay:
     name: Push to Quay
@@ -121,10 +121,10 @@ jobs:
           major="${version%%.*}"
           extra_args=""
           if [[ "$version" != *"-ext"* ]]; then
-            [[ "$major" != "$version" ]] && extra_args="--tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:${major}"
-            extra_args="$extra_args --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:latest"
+            [[ "$major" != "$version" ]] && extra_args="--tag quay.io/${QUAY_NAMESPACE%%+*}/android-sdk:${major}"
+            extra_args="$extra_args --tag quay.io/${QUAY_NAMESPACE%%+*}/android-sdk:latest"
           fi
           docker buildx imagetools create \
-            --tag quay.io/${QUAY_NAMESPACE%%+*}/${{ github.event.repository.name }}:${version} \
+            --tag quay.io/${QUAY_NAMESPACE%%+*}/android-sdk:${version} \
             ${extra_args} \
-            ghcr.io/${{ github.repository }}:${version}
+            ghcr.io/its-me/android-sdk:${version}
