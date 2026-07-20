@@ -1,0 +1,41 @@
+name: Repository Descriptions Update
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - HUB.md
+      - QUAY.md
+  workflow_dispatch:
+
+env:
+  REPOSITORY: android-sdk
+
+jobs:
+  hub:
+    name: Update Docker Hub description
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: its-me/action.hub.description@v1
+        with:
+          username: ${{ secrets.HUB_USERNAME }}
+          password: ${{ secrets.HUB_PASSWORD }}
+          repository: ${{ env.REPOSITORY }}
+
+  quay:
+    name: Update Quay.io description
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: its-me/action.quay.description@v1
+        with:
+          namespace: ${{ secrets.QUAY_USERNAME }}
+          api-token: ${{ secrets.QUAY_API_TOKEN }}
+          repository: ${{ env.REPOSITORY }}
