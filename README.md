@@ -105,4 +105,4 @@ Release workflows can also be triggered manually via `workflow_dispatch` with an
 
 ## License
 
-MIT
+[MIT](LICENSE)
