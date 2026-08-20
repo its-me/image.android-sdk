@@ -27,5 +27,5 @@ jobs:
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git tag -a "tools-$latest" -m "tools-$latest"
             git push origin "tools-$latest"
-            gh workflow run release-tools.yaml -f version="$latest"
+            gh workflow run release.yaml -f tier=tools -f version="$latest"
           fi
