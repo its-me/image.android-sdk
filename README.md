@@ -103,6 +103,8 @@ Each image family has a daily check workflow that queries a Google-hosted packag
 
 Release workflows can also be triggered manually via `workflow_dispatch` with an explicit version input.
 
+The git tag (`tools-<version>`, `build-tools-<version>`, or `<version>` for platform) is created by the release workflow itself once the dispatched tier has been pushed to Docker Hub and Quay.io, for both scheduled and manual runs. A failed release leaves no tag, so the next daily check retries it.
+
 Since each higher tier builds `FROM` the previous tier's mutable tag, a release also cascades upward within the same workflow run: releasing `tools` also rebuilds the current `build-tools` version and the current `platform` version on top of it, and releasing `build-tools` also rebuilds the current `platform` version — so higher tiers always stay on the freshest base, even when their own upstream version hasn't changed. Only the current version of each tier is cascaded; older pinned version tags (e.g. `build-tools-36.0.0`) are immutable snapshots and are never rebuilt.
 
 ## License
