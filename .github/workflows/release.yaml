@@ -1,4 +1,6 @@
 name: Release
+# Named after the repository tag the run releases: tools-<v>, build-tools-<v>, or bare <v> for platform.
+run-name: Release ${{ inputs.tier == 'platform' && inputs.version || inputs.tier && format('{0}-{1}', inputs.tier, inputs.version) || github.ref_name }}
 
 on:
   push:
@@ -16,6 +18,10 @@ on:
       version:
         description: 'Version for the selected tier (e.g. 14742923, 37.0.0, 35-ext14)'
         required: true
+
+concurrency:
+  group: release-${{ inputs.tier == 'platform' && inputs.version || inputs.tier && format('{0}-{1}', inputs.tier, inputs.version) || github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
   resolve:
@@ -43,6 +49,10 @@ jobs:
             echo "tier=platform" >> $GITHUB_OUTPUT
             echo "version=$GITHUB_REF_NAME" >> $GITHUB_OUTPUT
           else
+            if ! [[ "$INPUT_VERSION" =~ ^[0-9][0-9A-Za-z.-]*$ ]]; then
+              echo "::error::Invalid version: $INPUT_VERSION"
+              exit 1
+            fi
             echo "tier=$INPUT_TIER" >> $GITHUB_OUTPUT
             echo "version=$INPUT_VERSION" >> $GITHUB_OUTPUT
           fi
@@ -344,3 +354,50 @@ jobs:
           destination-username: ${{ secrets.QUAY_USERNAME }}
           destination-password: ${{ secrets.QUAY_TOKEN }}
           tags: ${{ needs.build-platform.outputs.tags }}
+
+  # Creates the repository tag for the dispatched tier once that tier's own
+  # Docker Hub and Quay.io pushes succeed. Cascaded rebuilds of higher tiers
+  # don't affect it. A failed release leaves no tag, so its check-release
+  # workflow re-dispatches it on the next run.
+  tag:
+    name: Create repository tag
+    needs:
+      - resolve
+      - push-tools-hub
+      - push-tools-quay
+      - push-build-tools-hub
+      - push-build-tools-quay
+      - push-platform-hub
+      - push-platform-quay
+    if: >-
+      always() && github.event_name == 'workflow_dispatch' && (
+        (needs.resolve.outputs.tier == 'tools' && needs.push-tools-hub.result == 'success' && needs.push-tools-quay.result == 'success') ||
+        (needs.resolve.outputs.tier == 'build-tools' && needs.push-build-tools-hub.result == 'success' && needs.push-build-tools-quay.result == 'success') ||
+        (needs.resolve.outputs.tier == 'platform' && needs.push-platform-hub.result == 'success' && needs.push-platform-quay.result == 'success'))
+    runs-on: ubuntu-slim
+    permissions:
+      contents: write
+    steps:
+      # Created with GITHUB_TOKEN, so the tag push does not re-trigger this workflow.
+      - name: Create tag if missing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TIER: ${{ needs.resolve.outputs.tier }}
+          VERSION: ${{ needs.resolve.outputs.version }}
+        run: |
+          set -euo pipefail
+          case "$TIER" in
+            tools|build-tools) tag="$TIER-$VERSION" ;;
+            platform) tag="$VERSION" ;;
+            *) echo "::error::Unknown tier: $TIER"; exit 1 ;;
+          esac
+          if gh api "repos/$GH_REPO/git/ref/tags/$tag" --silent 2>/dev/null; then
+            echo "Tag $tag already exists"
+            exit 0
+          fi
+          sha=$(gh api "repos/$GH_REPO/git/tags" \
+            -f tag="$tag" -f message="$tag" -f object="$GITHUB_SHA" -f type=commit \
+            --jq .sha)
+          gh api "repos/$GH_REPO/git/refs" -f ref="refs/tags/$tag" -f sha="$sha" --silent
+          echo "Created tag $tag at $GITHUB_SHA"
